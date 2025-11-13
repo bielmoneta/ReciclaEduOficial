@@ -1,0 +1,1 @@
+# ReciclaEdu - Execução local\n1. Crie um arquivo `.env` no backend baseado no `.env.example`.\n2. Execute `docker-compose up --build`.\n3. Backend: http://localhost:4000, Frontend: http://localhost:3000.
