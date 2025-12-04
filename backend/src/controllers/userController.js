@@ -1,4 +1,4 @@
-import User from "../models/User.js";
+import User from "../models/user.js";
 
 export const list = async (req, res) => {
   const users = await User.findAll({ attributes: ['id','name','email','points'] });
