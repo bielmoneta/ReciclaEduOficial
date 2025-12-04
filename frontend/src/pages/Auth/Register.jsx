@@ -6,14 +6,14 @@ export default function Register() {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [tipo_usuario, setTipoUsuario] = useState("aluno"); // valor padrão
+  const [tipo_usuario, setTipoUsuario] = useState("aluno");
 
   const register = async () => {
     try {
       await api.post("/auth/register", {
         nome,
         email,
-        password: senha,
+        senha,        // ← CORRETO
         tipo_usuario
       });
 

@@ -2,60 +2,67 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import Usuario from "../models/Usuario.js";
 
-// REGISTRO DE USUÁRIO
 export const register = async (req, res) => {
   try {
-    const { nome, email, password, tipo_usuario } = req.body;
+    console.log("DEBUG register body:", req.body);
 
-    // Verifica se o email já existe
+    const { nome, email, senha, tipo_usuario } = req.body;
+
+    if (!nome || !email || !senha || !tipo_usuario) {
+      return res.status(400).json({
+        error: "Campos obrigatórios faltando (nome, email, senha, tipo_usuario)"
+      });
+    }
+
     const existe = await Usuario.findOne({ where: { email } });
     if (existe) return res.status(400).json({ error: "Email já cadastrado" });
 
-    // Criptografa a senha
-    const hash = await bcrypt.hash(password, 10);
+    const hash = await bcrypt.hash(senha, 10);
 
-    // Cria o usuário
     const novoUsuario = await Usuario.create({
       nome,
       email,
-      password: hash, // campo agora existe no banco
-      tipo_usuario,
+      senha: hash,
+      tipo_usuario
     });
 
     return res.status(201).json({ message: "Cadastro realizado com sucesso" });
   } catch (err) {
     console.error("🔥 ERRO NO REGISTER:", err);
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
 
-// LOGIN DE USUÁRIO
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    console.log("DEBUG login body:", req.body);
 
-    // Encontra o usuário
+    const { email, senha } = req.body;
+
+    if (!email || !senha) {
+      return res.status(400).json({ error: "Email e senha são obrigatórios" });
+    }
+
     const usuario = await Usuario.findOne({ where: { email } });
-    if (!usuario) {
-      return res.status(404).json({ error: "Usuário não encontrado" });
-    }
+    if (!usuario) return res.status(404).json({ error: "Usuário não encontrado" });
 
-    // Verifica a senha
-    const senhaCorreta = await bcrypt.compare(password, usuario.password);
-    if (!senhaCorreta) {
-      return res.status(400).json({ error: "Senha incorreta" });
-    }
+    const senhaCorreta = await bcrypt.compare(senha, usuario.senha);
+    if (!senhaCorreta) return res.status(400).json({ error: "Senha incorreta" });
 
-    // Gera token JWT
     const token = jwt.sign(
       { id: usuario.id, tipo_usuario: usuario.tipo_usuario },
       "secreta123",
       { expiresIn: "1d" }
     );
 
-    res.json({ token, usuario });
+    return res.json({
+      message: "Login realizado com sucesso",
+      token,
+      usuario
+    });
+
   } catch (err) {
     console.error("🔥 ERRO NO LOGIN:", err);
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 };
